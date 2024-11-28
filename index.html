@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Music Empire Builder 🎵</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://cdn.pixabay.com/photo/2017/08/07/12/52/music-studio-2602164_960_720.jpg'); /* Studio image */
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        header {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ffdd00;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
+        }
+        .stats, .achievements {
+            margin: 20px auto;
+            font-size: 18px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #ffdd00;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+        }
+        .story {
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 90%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .options button {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #007BFF;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        .options button:hover {
+            background: #0056b3;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        footer {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 30px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulse 0.5s;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <header>🎵 Music Empire Builder 🎵</header>
+
+    <div class="stats" id="stats">
+        Fans: 500 | 🎧 Streams: 0 | 💰 Money: $10,000 | 🎨 Creativity: 50 | 🌟 Reputation: 50 | ⚡ Energy: 100 | ⏱️ Time: 0s
+    </div>
+
+    <div class="story" id="story">
+        🎙️ You're a small-town artist with big dreams. Build your music empire and reach **1 million fans** to win. Plan your actions carefully, as poor decisions can ruin your career!
+    </div>
+
+    <div class="options" id="options">
+        <button onclick="chooseOption('dropSong')">🎶 Drop a Song</button>
+        <button onclick="chooseOption('promote')">📢 Promote on Social Media</button>
+        <button onclick="chooseOption('collab')">🤝 Collaborate with a Friend</button>
+        <button onclick="chooseOption('randomEvent')">🎲 Take a Risky Opportunity</button>
+    </div>
+
+    <div class="achievements" id="achievements">
+        <strong>🏆 Achievements:</strong> None yet.
+    </div>
+
+    <footer>
+        Build your music empire one decision at a time. 🎧
+    </footer>
+
+    <audio id="dropSongSound" src="https://freesound.org/data/previews/174/174762_3248244-lq.mp3"></audio>
+    <audio id="achievementSound" src="https://freesound.org/data/previews/341/341695_3248244-lq.mp3"></audio>
+
+    <script>
+        /* Game Variables */
+        let fans = 500;
+        let streams = 0;
+        let money = 10000;
+        let creativity = 50;
+        let reputation = 50;
+        let energy = 100;
+        let level = 1;
+        let achievements = [];
+        let timeElapsed = 0;
+        let timerInterval;
+
+        /* Milestone Energy Replenishment */
+        const energyMilestones = [10000, 50000, 100000, 500000];
+
+        /* Sound Effects */
+        const dropSongSound = document.getElementById('dropSongSound');
+        const achievementSound = document.getElementById('achievementSound');
+
+        /* Save Game State */
+        function saveGameState() {
+            const gameState = { fans, streams, money, creativity, reputation, energy, level, achievements, timeElapsed };
+            localStorage.setItem('musicEmpireState', JSON.stringify(gameState));
+        }
+
+        /* Load Game State */
+        function loadGameState() {
+            const savedState = JSON.parse(localStorage.getItem('musicEmpireState'));
+            if (savedState) {
+                ({ fans, streams, money, creativity, reputation, energy, level, achievements, timeElapsed } = savedState);
+                updateStats();
+                updateAchievements();
+            }
+        }
+
+        /* Start Game Timer */
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeElapsed += 3;
+                money -= 50;
+                fans -= 20;
+                if (timeElapsed % 6 === 0) energy = Math.max(0, energy - 2); // Slower energy drain
+                creativity = Math.max(0, creativity - 1);
+                reputation = Math.max(0, reputation - 1);
+                checkEnergyReplenishment();
+                updateStats();
+                checkLoseConditions();
+            }, 3000);
+        }
+
+        /* Stop Game Timer */
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        /* Energy Replenishment on Milestones */
+        function checkEnergyReplenishment() {
+            if (energyMilestones.length > 0 && fans >= energyMilestones[0]) {
+                energy = Math.min(100, energy + 20); // Replenish 20 energy
+                energyMilestones.shift(); // Remove the achieved milestone
+                alert("🎉 Your success has reinvigorated you! Energy replenished by 20!");
+                updateStats();
+            }
+        }
+
+        /* Update Stats */
+        function updateStats() {
+            const statsDiv = document.getElementById("stats");
+            statsDiv.classList.add("pulse");
+            setTimeout(() => statsDiv.classList.remove("pulse"), 500);
+            statsDiv.innerHTML = `
+                Fans: ${fans.toLocaleString()} | 🎧 Streams: ${streams.toLocaleString()} |
+                💰 Money: $${money.toLocaleString()} | 🎨 Creativity: ${creativity} |
+                🌟 Reputation: ${reputation} | ⚡ Energy: ${energy} | ⏱️ Time: ${timeElapsed}s
+            `;
+            saveGameState();
+        }
+
+        /* Add Achievement */
+        function addAchievement(achievement) {
+            if (!achievements.includes(achievement)) {
+                achievements.push(achievement);
+                achievementSound.play();
+                updateAchievements();
+            }
+        }
+
+        /* Update Achievements */
+        function updateAchievements() {
+            const achievementsDiv = document.getElementById("achievements");
+            achievementsDiv.innerHTML = `
+                <strong>🏆 Achievements:</strong>
+                ${achievements.length > 0 ? achievements.map(a => `<p>🎉 ${a}</p>`).join('') : 'None yet.'}
+            `;
+        }
+
+        /* Choose Option */
+        function chooseOption(option) {
+            const storyDiv = document.getElementById("story");
+            if (option === "dropSong") {
+                dropSongSound.play();
+                streams += 15000;
+                fans += 2000;
+                creativity -= 5;
+                money += 3000;
+                storyDiv.innerHTML = "🎶 You dropped a hit single! Fans and streams surged, but creativity took a hit.";
+            } else if (option === "promote") {
+                if (money >= 1000) {
+                    fans += 3000;
+                    reputation += 5;
+                    money -= 1000;
+                    storyDiv.innerHTML = "📢 Social media promo boosted your fans and reputation!";
+                } else {
+                    storyDiv.innerHTML = "🚫 Not enough money to promote on social media.";
+                }
+            } else if (option === "collab") {
+                if (money >= 5000) {
+                    fans += 5000;
+                    creativity += 10;
+                    money -= 5000;
+                    storyDiv.innerHTML = "🤝 Your collab with a rising artist boosted your creativity and fans!";
+                } else {
+                    storyDiv.innerHTML = "🚫 You can't afford to collaborate right now.";
+                }
+            } else if (option === "randomEvent") {
+                randomEvent();
+            }
+            updateStats();
+        }
+
+        /* Random Events */
+        function randomEvent() {
+            const events = [
+                { text: "🎤 A rival artist dissed you. Respond publicly?", effect: () => {
+                    fans += 5000;
+                    reputation += 10;
+                    money -= 1000;
+                    return "🎤 Your response went viral! Gained 5,000 fans and improved reputation but lost $1,000 in PR.";
+                }},
+                { text: "🎙️ Your microphone broke during a live performance!", effect: () => {
+                    fans -= 2000;
+                    energy -= 10;
+                    return "🎙️ Fans were disappointed. Lost 2,000 fans and some energy.";
+                }}
+            ];
+
+            const random = events[Math.floor(Math.random() * events.length)];
+            const decision = confirm(random.text);
+            const result = decision ? random.effect() : "You chose to ignore the event.";
+            alert(result);
+            updateStats();
+        }
+
+        /* Restart Game */
+        function restartGame() {
+            fans = 500;
+            streams = 0;
+            money = 10000;
+            creativity = 50;
+            reputation = 50;
+            energy = 100;
+            level = 1;
+            achievements = [];
+            timeElapsed = 0;
+            document.getElementById("story").innerHTML = `
+                🎙️ You're a small-town artist with big dreams. Build your music empire and reach 1 million fans to win.
+            `;
+            updateStats();
+        }
+
+        loadGameState();
+        updateStats();
+        startTimer();
+    </script>
+</body>
+</html>
